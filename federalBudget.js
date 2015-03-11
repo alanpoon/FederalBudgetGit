@@ -27,19 +27,22 @@ function federalChart(){
 		var colors=["#bd0026","#fecc5c", "#fd8d3c", "#f03b20", "#B02D5D",
         "#9B2C67", "#982B9A", "#692DA7", "#5725AA", "#4823AF",
         "#d7b5d8","#dd1c77","#5A0C7A","#5A0C7A"];
+		var dataGroupHex="#dataGroup_"+viewId;
+		var dataGroupKey="navBar";
 	function chart(selection) {
+	var yui=0;
 		selection.each(function(data) {
-	
-	console.log("Fselect",Fselect);
-
-		
+		yui=yui+1;
 		debugFn2();
 		d3select();
+		 multiSelectFn(jQuery);
 		
 		initialize(groupCount);
 		setup();
-		togglesetup();
+		 initializeNavBar(dataGroupKey,dataGroupHex,viewId,ToolTipContainer);
+		//togglesetup();
 		});
+		console.log("yui..",yui);
 		}	
 	chart.viewId = function(value) {
 		if (!arguments.length) return viewId;
@@ -91,9 +94,61 @@ function federalChart(){
 		colors = value;
 		return chart;
 	};
-
+	chart.dataGroupHex = function(value){
+		if (!arguments.length) return dataGroupHex;
+		dataGroupHex = value;
+		return chart;
+	};
+	chart.dataGroupKey = function(value){
+		if (!arguments.length) return dataGroupKey;
+		dataGroupKey = value;
+		return chart;
+	};
 	return chart;
 	function debugFn2(){
+		initializeNavBar=function(dataGroupKey,dataGroupHex,viewId,ToolTipContainer){
+		console.log("initializeNavBar..");
+	      root.values.forEach(toggleAll);
+        toggle(root.values[2]);	        
+			if (dataGroupKey === 'navBar') {
+		console.log("dataGroupHex",dataGroupHex);
+			var dataGroupContent = d3.select(dataGroupHex);
+            dataGroupContent.append("td")
+                .append("select").attr("id", 'periodSelect_' + viewId);
+				var periodSelect_hex = '#periodSelect_' + viewId;
+	         var periodSelect_el = $(periodSelect_hex).multiselect({
+                selectedList: 1,
+                multiple: false,
+                click: function(event, ui) {
+                    Fselect['spendField'] = 'sum_'+ui.value;
+					Fselect['actField'] ='sum_'+ui.value;
+					   setup();
+                update(root, groupCount,viewId);
+            }});
+		
+			  addPeriodOptions(periodSelect_el,ToolTipContainer);
+			  } else {
+			  console.log("else true");
+			       $(periodSelect_hex).empty();
+				   	  }
+			};
+			
+	addPeriodOptions = function(periodSelect_el,ToolTipContainer) {
+	console.log("addPeriodOptions periodSelect_el",periodSelect_el);
+	
+        _.each(_.values(ToolTipContainer), function(m) {
+		console.log("mm m",m);
+         //   var opt = $('&lt;option /&gt;', {
+		    var opt = $('<option />	', {
+                value: m,
+                text: m
+            });
+				console.log("opt hot",opt);
+            opt.appendTo(periodSelect_el);
+        });
+
+        periodSelect_el.multiselect('refresh');
+    };
     d3select = function() {
 	toolTip=d3.select("#toolTip_" + viewId);
 	header= d3.select("#toolTip_" + viewId + " #head");
@@ -106,8 +161,7 @@ console.log("d3select ToolTipContainer",ToolTipContainer);
             var pushObjDiv = d3.select("#toolTip_" + viewId + ' #toolAppend' + ' #toolDiv_' + viewId + '_' + (i + 1))
 					.style({'width':'125px','left':divLeft ,'top':'10px','position':'absolute'});
         	ToolTipContainer_Div[d]=pushObjDiv;
-            var pushObjBut = d3.select("#navigButton_" + (i + 1));
-        	ToolTipContainer_But[d]=pushObjBut;
+
             var pushObjSpend = d3.select("#toolSpend_" + viewId + '_' + (i + 1));
         	ToolTipContainer_Spend[d]=pushObjSpend;
         });
@@ -128,22 +182,15 @@ console.log("d3select ToolTipContainer",ToolTipContainer);
             .attr("height", height + parseInt(margin[0]) + parseInt(margin[2]))
             .append("svg:g")
             .attr("transform", "translate(" + parseInt(margin[3]) + "," + parseInt(margin[2]) + ")");
-
-
     };
 	
     togglesetup = function() {
         root.values.forEach(toggleAll);
-		console.log("root.values[2]",root.values[2]);
         toggle(root.values[2]);
-
         for (var propertyName in ToolTipContainer_But) {
-
             var localButtonArr = _.keys(ToolTipContainer_But);
-       
             d3.select("#navigButton_" + (propertyName + 1)).on("click", function(d) {
                 d3.select("#navigButton_" + (propertyName + 1)).attr("class", "selected");
-              
 			       var restlocalButtonArr = _.reject(localButtonArr, function(num) {
                 return num == propertyName;
             });
@@ -157,8 +204,6 @@ console.log("d3select ToolTipContainer",ToolTipContainer);
                 update(root, groupCount,viewId);
             });
         }
-		
-
 		update(root, groupCount,viewId);
 
     };
@@ -182,7 +227,6 @@ console.log("d3select ToolTipContainer",ToolTipContainer);
         for (var i = 0; i < Fselect.sumField.length; i++) {
             _.each(groupbyRange, function(d) {
                 holding[d + '_Max']['sum_' + Fselect.sumField[i]] = 0;
-				
             });
         }
 
