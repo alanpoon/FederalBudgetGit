@@ -30,9 +30,8 @@ function federalChart(){
 		var dataGroupHex="#dataGroup_"+viewId;
 		var dataGroupKey="navBar";
 	function chart(selection) {
-	var yui=0;
+
 		selection.each(function(data) {
-		yui=yui+1;
 		debugFn2();
 		d3select();
 		 multiSelectFn(jQuery);
@@ -42,7 +41,6 @@ function federalChart(){
 		 initializeNavBar(dataGroupKey,dataGroupHex,viewId,ToolTipContainer);
 		//togglesetup();
 		});
-		console.log("yui..",yui);
 		}	
 	chart.viewId = function(value) {
 		if (!arguments.length) return viewId;
@@ -131,6 +129,8 @@ function federalChart(){
 			  console.log("else true");
 			       $(periodSelect_hex).empty();
 				   	  }
+					  
+			 update(root, groupCount,viewId);
 			};
 			
 	addPeriodOptions = function(periodSelect_el,ToolTipContainer) {
@@ -139,7 +139,7 @@ function federalChart(){
         _.each(_.values(ToolTipContainer), function(m) {
 		console.log("mm m",m);
          //   var opt = $('&lt;option /&gt;', {
-		    var opt = $('<option />	', {
+		    var opt = $('<option />', {
                 value: m,
                 text: m
             });
@@ -361,7 +361,7 @@ function update(source, groupCount,viewId) {
         .on("click", function(d) {
             if (d.numChildren > 50) {
                 alert(d.key + " has too many departments (" + d.numChildren + ") to view at once.");
-            } else {
+            } else if(  d.depth <groupCount) {
                 toggle(d);
                 update(d,groupCount,viewId);
             }
