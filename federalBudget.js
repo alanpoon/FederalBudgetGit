@@ -13,7 +13,6 @@ function federalChart(){
                  ret = (String(ret).length > 25) ? String(ret).substr(0, 22) + "..." : ret;
                  return ret;
              };
-		var toolTip=1;
 		var header=1;
 		var header1=1; var header2;
 		var ToolTipContainer_Div={};
@@ -39,6 +38,7 @@ function federalChart(){
 		initialize(groupCount);
 		setup();
 		 initializeNavBar(dataGroupKey,dataGroupHex,viewId,ToolTipContainer);
+		 initializeToolTip1(viewId,ToolTipContainer);
 		//togglesetup();
 		});
 		}	
@@ -132,7 +132,27 @@ function federalChart(){
 					  
 			 update(root, groupCount,viewId);
 			};
-			
+	initializeToolTip1=function(viewId,ToolTipContainer){
+				// Tooltip
+			var tooltip = d3.select("body")
+				.append("div")
+				.attr("class", "tooltip_"+viewId)
+				.style("font", "Arial black;")
+				.style("font-size", "11px")
+				.style("margin", "8px")
+				.style("padding", "5px")
+				.style("border", "1px solid #000")
+				.style("background-color", "rgba(255,255,255,1)")
+				.style("position", "absolute")
+				.style("z-index", "1001")
+				.style("opacity", "0.8")
+				.style("border-radius", "3px")
+				.style("box-shadow", "5px 5px 5px #888")
+				.style("visibility", "hidden");
+	
+	
+	};
+	
 	addPeriodOptions = function(periodSelect_el,ToolTipContainer) {
 	console.log("addPeriodOptions periodSelect_el",periodSelect_el);
 	
@@ -150,21 +170,7 @@ function federalChart(){
         periodSelect_el.multiselect('refresh');
     };
     d3select = function() {
-	toolTip=d3.select("#toolTip_" + viewId);
-	header= d3.select("#toolTip_" + viewId + " #head");
-	header1=d3.select("#toolTip_" + viewId + " #header1");
-	header2= d3.select("#toolTip_" + viewId + " #header2");
-        console.log("d3select ToolTipContainer",ToolTipContainer,'viewId',viewId);
-console.log("d3select ToolTipContainer",ToolTipContainer);
-        _.each(_.keys(ToolTipContainer), function(d, i) {
-		var divLeft=i*140+'px';
-            var pushObjDiv = d3.select("#toolTip_" + viewId + ' #toolAppend' + ' #toolDiv_' + viewId + '_' + (i + 1))
-					.style({'width':'125px','left':divLeft ,'top':'10px','position':'absolute'});
-        	ToolTipContainer_Div[d]=pushObjDiv;
-
-            var pushObjSpend = d3.select("#toolSpend_" + viewId + '_' + (i + 1));
-        	ToolTipContainer_Spend[d]=pushObjSpend;
-        });
+	
 
         tree = d3.layout.tree();
 
@@ -372,10 +378,8 @@ function update(source, groupCount,viewId) {
         .on("mouseover", function(d) {
             node_onMouseOver(d, groupCount,viewId);
         })
-        .on("mouseout", function(d) { // when the mouse leaves a circle, do the following
-            toolTip.transition() // declare the transition properties to fade-out the div
-                .duration(500) // it shall take 500ms
-                .style("opacity", "0"); // and go all the way to an opacity of nil
+        .on("mouseout", function(d) {
+		d3.select(".tooltip_"+viewId).style("visibility", "hidden");
         })
         .style("fill", function(d) {
             return d.source ? d.source.linkColor : d.linkColor;
@@ -413,10 +417,8 @@ function update(source, groupCount,viewId) {
         .on("mouseover", function(d) {
             node_onMouseOver(d, groupCount,viewId);
         })
-        .on("mouseout", function(d) { // when the mouse leaves a circle, do the following
-            toolTip.transition() // declare the transition properties to fade-out the div
-                .duration(500) // it shall take 500ms
-                .style("opacity", "0"); // and go all the way to an opacity of nil
+        .on("mouseout", function(d) { 
+		d3.select(".tooltip_"+viewId).style("visibility", "hidden");
         })
         .style("fill-opacity", "0");
 
@@ -572,29 +574,33 @@ function update(source, groupCount,viewId) {
 }
 
 function node_onMouseOver(d, groupCount,viewId) {
-    toolTip.transition().duration(200).style("opacity", ".9");
-    header.text(retDes(d));
-    var groupbyRange = _.map(_.range(1, groupCount + 1), function(m) {
-        return 'groupby' + m;
-    });
-
-    _.each(groupbyRange, function(m, n) {
-        if (d.depth == (n + 1)) {
-		//	header2.html(d['source_' + m]);
-            header1.text(d['source_' + m]);
-        } else header1.text("");
-    });
-
+  console.log("d..",d);
     var formatNumber = d3.format(",^ $");
     var formatCurrency = function(d) {
         return formatNumber(d)
     };
-    for (var propertyName in ToolTipContainer) {
-        ToolTipContainer_Spend[propertyName].text(formatCurrency(d['sum_' + ToolTipContainer[propertyName]]));
-        toolTip.style("left", (d3.event.pageX) + "px")
-            .style("top", (d3.event.pageY) + "px");
-    }
+ /*
+     _.each(groupbyRange, function(m, n) {
+        if (d.depth == (n + 1)) {
 
+			var headerText=d['source_' + m];
+        } else var headerText="";
+    }); */
+	var content = "<b>" + d.key + "</b><hr>";
+	
+	_.each(Fselect['sumField'],function(m,n){
+	console.log("sumField m",m,"  Fselect['spendField']",Fselect['spendField']);
+		var dNop='sum_'+m;
+		if(dNop==Fselect['spendField']) {
+		content=content+"<b>"+m+": "+formatCurrency(d['sum_'+m]) +"</b><br>";
+		} else content=content+m+": "+formatCurrency(d['sum_'+m])+"<br>";
+	
+	});
+			console.log("content",content);
+		d3.select(".tooltip_"+viewId).style("visibility", "visible")
+			.style("top", (d3.event.pageY-35)+"px")
+			.style("left", d3.event.pageX+"px")
+			.html(content);
 }
 
 function toggleButton(button,viewId) {
