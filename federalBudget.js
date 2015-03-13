@@ -27,6 +27,7 @@ function federalChart(){
         "#d7b5d8","#dd1c77","#5A0C7A","#5A0C7A"];
 		var dataGroupHex="#dataGroup_"+viewId;
 		var dataGroupKey="navBar";
+		var linkSize=180;
 	function chart(selection) {
 
 		selection.each(function(data) {
@@ -114,6 +115,7 @@ function federalChart(){
                 .append("select").attr("id", 'periodSelect_' + viewId);
 				var periodSelect_hex = '#periodSelect_' + viewId;
 	         var periodSelect_el = $(periodSelect_hex).multiselect({
+				minWidth:150,
                 selectedList: 1,
                 multiple: false,
                 click: function(event, ui) {
@@ -170,7 +172,6 @@ function federalChart(){
     };
     d3select = function() {
 	
-
         tree = d3.layout.tree();
 
         tree.children(function(d) {
@@ -179,6 +180,7 @@ function federalChart(){
         tree.size([height, width]);
         diagonal = d3.svg.diagonal()
             .projection(function(d) {
+			console.log("d.y:",d.y,"   d.x:",d.x);
                 return [d.y, d.x];
             });
 
@@ -327,7 +329,7 @@ function update(source, groupCount,viewId) {
 
     // Normalize for fixed-depth.
     nodes.forEach(function(d) {
-        d.y = d.depth * 180;
+        d.y = d.depth * linkSize;
         d.numChildren = (d.children) ? d.children.length : 0;
 
         if (d.depth == 1) {
