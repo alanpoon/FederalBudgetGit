@@ -13,8 +13,7 @@ function federalChart(){
                  ret = (String(ret).length > 25) ? String(ret).substr(0, 22) + "..." : ret;
                  return ret;
              };
-		var header=1;
-		var header1=1; var header2;
+	
 		var ToolTipContainer_Div={};
 		var ToolTipContainer_But={};
 
