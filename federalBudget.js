@@ -27,7 +27,9 @@ function federalChart(){
         "#d7b5d8","#dd1c77","#5A0C7A","#5A0C7A"];
 		var dataGroupHex="#dataGroup_"+viewId;
 		var dataGroupKey="navBar";
+		var maxBubbleSize=50;
 		var linkSize=180;
+		var navBarMinWidth=150;
 	function chart(selection) {
 
 		selection.each(function(data) {
@@ -39,6 +41,7 @@ function federalChart(){
 		setup();
 		 initializeNavBar(dataGroupKey,dataGroupHex,viewId,ToolTipContainer);
 		 initializeToolTip1(viewId,ToolTipContainer);
+		 initializeSliders(dataGroupHex,viewId);
 		//togglesetup();
 		});
 		}	
@@ -102,6 +105,23 @@ function federalChart(){
 		dataGroupKey = value;
 		return chart;
 	};
+	chart.maxBubbleSize = function(value){
+		if (!arguments.length) return maxBubbleSize;
+		maxBubbleSize = value;
+		return chart;
+	};
+	chart.linkSize = function(value){
+		if (!arguments.length) return linkSize;
+		linkSize = value;
+		return chart;
+	};
+		chart.navBarMinWidth = function(value){
+		if (!arguments.length) return navBarMinWidth;
+		navBarMinWidth = value;
+		return chart;
+	};
+	
+	return chart;
 	return chart;
 	function debugFn2(){
 		initializeNavBar=function(dataGroupKey,dataGroupHex,viewId,ToolTipContainer){
@@ -111,11 +131,11 @@ function federalChart(){
 			if (dataGroupKey === 'navBar') {
 		console.log("dataGroupHex",dataGroupHex);
 			var dataGroupContent = d3.select(dataGroupHex);
-            dataGroupContent.append("td")
+            dataGroupContent.append("td").attr('width',(navBarMinWidth+30)+'px')
                 .append("select").attr("id", 'periodSelect_' + viewId);
 				var periodSelect_hex = '#periodSelect_' + viewId;
 	         var periodSelect_el = $(periodSelect_hex).multiselect({
-				minWidth:150,
+				minWidth:navBarMinWidth,
                 selectedList: 1,
                 multiple: false,
                 click: function(event, ui) {
@@ -154,6 +174,62 @@ function federalChart(){
 	
 	};
 	
+	initializeSliders = function(dataGroupHex,viewId){
+	//bubbleSlider
+	var subBubbleDiv=d3.select(dataGroupHex).append("td").attr("class",'sliderClass');
+	subBubbleDiv.append("tr").append("div").attr("id","bubbleSlider_"+viewId);
+	subBubbleDiv.append("tr").append("div").text("Bubble Scale");
+	$('#bubbleSlider_'+viewId).slider(
+		{min:30,
+		max:80,
+		values:[50],
+		change:function(event,ui){
+		maxBubbleSize=ui.value;
+		   setup();
+			update(root, groupCount,viewId);
+		}
+		}
+	); 
+	d3.select('#bubbleSlider_'+viewId).style("width",100);
+	
+	//linkSlider
+	var subLinkDiv=d3.select(dataGroupHex).append("td").attr("class",'sliderClass');
+	subLinkDiv.append("tr").append("div").attr("id","linkSlider_"+viewId);
+	subLinkDiv.append("tr").append("div").text("Link Scale");
+	$('#linkSlider_'+viewId).slider(
+		{min:120,
+		max:200,
+		values:[170],
+		change:function(event,ui){
+		linkSize=ui.value;
+		   setup();
+			update(root, groupCount,viewId);
+		}
+		}
+	);
+	d3.select('#linkSlider_'+viewId).style("width",100);
+	//heightSlider
+	var subHeightDiv=d3.select(dataGroupHex).append("td").attr("class",'sliderClass');
+	subHeightDiv.append("tr").append("div").attr("id","heightSlider_"+viewId);
+	subHeightDiv.append("tr").append("div").text("Height Scale");
+	$('#heightSlider_'+viewId).slider(
+		{min:300,
+		max:800,
+		values:[450],
+		change:function(event,ui){
+		height=ui.value;
+		console.log("height used",height);
+	console.log("d3.select",d3.select("#body_"+viewId));
+		 tree.size([height, width]);
+		 d3.select("#body_"+viewId+" svg").attr("height", height + parseInt(margin[0]) + parseInt(margin[2]));
+
+		   setup();
+			update(root, groupCount,viewId);
+		}
+		}
+	);
+	d3.select('#heightSlider_'+viewId).style("width",100);
+	};
 	addPeriodOptions = function(periodSelect_el,ToolTipContainer) {
 	console.log("addPeriodOptions periodSelect_el",periodSelect_el);
 	
@@ -180,8 +256,8 @@ function federalChart(){
         tree.size([height, width]);
         diagonal = d3.svg.diagonal()
             .projection(function(d) {
-			console.log("d.y:",d.y,"   d.x:",d.x);
-                return [d.y, d.x];
+             //   return [d.y, d.x];
+			    return [d.y, d.x];
             });
 
         vis = d3.select("#body_" + viewId).append("svg:svg")
@@ -226,7 +302,6 @@ function federalChart(){
         data_i = 0;
 
         var nodes = tree.nodes(root).reverse();
-		console.log("nodes..",nodes);
         tree.children(function(d) {
             return d.children;
         });
@@ -236,19 +311,17 @@ function federalChart(){
                 holding[d + '_Max']['sum_' + Fselect.sumField[i]] = 0;
             });
         }
-
-        sumNodes(root.children,groupCount,viewId);
+        sumNodes([root],groupCount,viewId);
     };
 
     setup = function() {
-
         var groupbyRange = _.map(_.range(1, groupCount + 1), function(m) {
             return 'groupby' + m;
         });
         _.each(groupbyRange, function(d, i) {
             holding[d + '_Radius'] = d3.scale.sqrt()
                 .domain([0,holding[d+'_Max'][Fselect.spendField]])
-                .range([1, 50]);
+                .range([1, parseInt(maxBubbleSize)]);
 
         });
 
@@ -286,6 +359,7 @@ function setSourceFields(child, parent,viewId) {
 function sumNodes(nodes, groupCount,viewId) {
     for (var y = 0; y < nodes.length; y++) {
         var node = nodes[y];
+		if(node.depth==0) node.key='Total';
         if (node.children) {
             sumNodes(node.children,groupCount,viewId);
             for (var z = 0; z < node.children.length; z++) {
@@ -303,6 +377,7 @@ function sumNodes(nodes, groupCount,viewId) {
                             }
                         }
                         setSourceFields(node, node.parent,viewId);
+				
                     }
                 }
             }
@@ -318,10 +393,29 @@ function sumNodes(nodes, groupCount,viewId) {
     }
 
 }
+function sumNodeDepthZero(root){
+  for (var z = 0; z < root.values.length; z++) {
+        for (var i = 0; i < Fselect.sumField.length; i++) {
+                    if (isNaN(node["sum_" + Fselect.sumField[i]])) node["sum_" + Fselect.sumField[i]] = 0;
+                    node["sum_" + Fselect.sumField[i]] += Number(child["sum_" + Fselect.sumField[i]]);
+
+                    //Set scales;
+                    if ((node.parent)) {
+                        for (var n = 1; n <= groupCount; n++) {
+                            if (node.depth == n) {
+                                holding['groupby'+n + '_Max']["sum_" + Fselect.sumField[i]] = Math.max(parseInt(holding['groupby'+n + '_Max']["sum_" + Fselect.sumField[i]]), Number(node["sum_" + Fselect.sumField[i]]));
+							
+                            }
+                        }
+                        setSourceFields(node, node.parent,viewId);
+                    }
+                }
+				}
+}
 
 function update(source, groupCount,viewId) {
 
-    var duration = d3.event && d3.event.altKey ? 5000 : 500;
+    var duration = d3.event && d3.event.altKey ? 2000 : 200;
 
     var nodes = tree.nodes(root).reverse();
 
@@ -329,7 +423,7 @@ function update(source, groupCount,viewId) {
 
     // Normalize for fixed-depth.
     nodes.forEach(function(d) {
-        d.y = d.depth * linkSize;
+        d.y = d.depth * parseInt(linkSize);
         d.numChildren = (d.children) ? d.children.length : 0;
 
         if (d.depth == 1) {
@@ -363,7 +457,8 @@ function update(source, groupCount,viewId) {
     var nodeEnter = node.enter().append("svg:g")
         .attr("class", "node")
         .attr("transform", function(d) {
-            return "translate(" + source.y0 + "," + source.x0 + ")";
+           return "translate(" + source.y0 + "," + source.x0 + ")";
+	    
         })
         .on("click", function(d) {
             if (d.numChildren > 50) {
@@ -427,7 +522,9 @@ function update(source, groupCount,viewId) {
     var nodeUpdate = node.transition()
         .duration(duration)
         .attr("transform", function(d) {
-            return "translate(" + d.y + "," + d.x + ")";
+	
+           return "translate(" + d.y + "," + d.x + ")";
+	
         });
 
     nodeUpdate.select("circle")
@@ -462,7 +559,9 @@ function update(source, groupCount,viewId) {
     var nodeExit = node.exit().transition()
         .duration(duration)
         .attr("transform", function(d) {
-            return "translate(" + source.y + "," + source.x + ")";
+		var newX=source.x+30;
+           // return "translate(" + source.y + "," + source.x + ")";
+		   return "translate(" + source.y + "," + newX + ")";
         })
         .remove();
 
@@ -575,7 +674,6 @@ function update(source, groupCount,viewId) {
 }
 
 function node_onMouseOver(d, groupCount,viewId) {
-  console.log("d..",d);
     var formatNumber = d3.format(",^ $");
     var formatCurrency = function(d) {
         return formatNumber(d)
@@ -590,14 +688,13 @@ function node_onMouseOver(d, groupCount,viewId) {
 	var content = "<b>" + d.key + "</b><hr>";
 	
 	_.each(Fselect['sumField'],function(m,n){
-	console.log("sumField m",m,"  Fselect['spendField']",Fselect['spendField']);
 		var dNop='sum_'+m;
 		if(dNop==Fselect['spendField']) {
 		content=content+"<b>"+m+": "+formatCurrency(d['sum_'+m]) +"</b><br>";
 		} else content=content+m+": "+formatCurrency(d['sum_'+m])+"<br>";
 	
 	});
-			console.log("content",content);
+		
 		d3.select(".tooltip_"+viewId).style("visibility", "visible")
 			.style("top", (d3.event.pageY-35)+"px")
 			.style("left", d3.event.pageX+"px")
