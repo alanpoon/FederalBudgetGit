@@ -146,7 +146,8 @@
 		"marginL":"170",
 		"marginR":"20",
       "frameWidth":"670",
-      "frameHeight":"420"      
+      "frameHeight":"420",
+      "navBarMinWidth":"180"
       }
 		 },
   "includes":["/elx/lib/d3.v3.js","/elx/lib/federalBudget.js","/elx/lib/multiSelectCustom.js"],
@@ -291,6 +292,29 @@
                      "id":"typeinfo-nestArr",
                      "type":"field",
                      "value":"${typeinfo.nestArr}",
+                     "readonly":false
+                  }
+               ]
+            }
+         ]
+      },{
+         "jsonClass":"Group",
+         "label":"Nav Bar",
+         "rows":[
+            {
+               "jsonClass":"Row",
+               "cols":[
+                  {
+                     "jsonClass":"Label",
+                     "id":"typeinfo-navBarMinWidth-label",
+                     "type":"label",
+                     "text":"Nav Bar MinWidth"
+                  },
+                  {
+                     "jsonClass":"Field",
+                     "id":"typeinfo-navBarMinWidth",
+                     "type":"field",
+                     "value":"${typeinfo.navBarMinWidth}",
                      "readonly":false
                   }
                ]
@@ -580,20 +604,25 @@ elx.bundle.type.FederalBudget2 = {
 ========
 <<<<<<<=view-html=
 <style type='text/css'>
-a:hover{font-weight:700;color:#000}#body_${id}{margin:0;font-size:14px;font-family:"Helvetica Neue",Helvetica}
-  rect{fill:none;pointer-events:all}pre{font-size:18px}
-  line{stroke:#000;stroke-width:1.5px}.string,.regexp{color:#f39}.keyword{color:#00c}.comment{color:#777;font-style:oblique}.number{color:#369}.class,.special{color:#1181B8}a:link,a:visited{color:#000;text-decoration:none}a:hover{color:#666}.hint{position:absolute;right:0;width:1280px;font-size:12px;color:#999}.node circle{cursor:pointer;stroke-width:1.5px}.node text{font-size:11px}
-  path.link{fill:none;stroke:#ccc;stroke-width:1.5px}
+  #body_${id}{margin:0;font-size:14px;font-family:"Helvetica Neue",Helvetica}
+  .node circle{cursor:pointer;stroke-width:1.5px}.node text{font-size:11px}
+    path.link{fill:none;stroke:#ccc;stroke-width:1.5px}
  
   .ui-multiselect{padding:2px 0 2px 4px;text-align:left}.ui-multiselect span.ui-icon{float:right}.ui-multiselect-single .ui-multiselect-checkboxes input{position:absolute!important;top:auto!important;left:-9999px}.ui-multiselect-single .ui-multiselect-checkboxes label{padding:5px!important}.ui-multiselect-header{margin-bottom:3px;padding:3px 0 3px 4px}.ui-multiselect-header ul{font-size:.9em}.ui-multiselect-header ul li{float:left;padding:0 10px 0 0}.ui-multiselect-header a{text-decoration:none}.ui-multiselect-header a:hover{text-decoration:underline}.ui-multiselect-header span.ui-icon{float:left}.ui-multiselect-header li.ui-multiselect-close{float:right;text-align:right;padding-right:0}.ui-multiselect-menu{display:none;padding:3px;position:absolute;z-index:10000;text-align:left}.ui-multiselect-checkboxes{position:relative;overflow-y:auto}.ui-multiselect-checkboxes label{cursor:default;display:block;border:1px solid transparent;padding:3px 1px}.ui-multiselect-checkboxes label input{position:relative;top:1px}.ui-multiselect-checkboxes li{clear:both;font-size:.9em;padding-right:3px}.ui-multiselect-checkboxes li.ui-multiselect-optgroup-label{text-align:center;font-weight:700;border-bottom:1px solid}.ui-multiselect-checkboxes li.ui-multiselect-optgroup-label a{display:block;padding:3px;margin:1px 0;text-decoration:none}* html .ui-multiselect-checkboxes label{border:none}
 </style>
 <div id ='mega${id}'>
 <table id='dataGroup_${id}'></table>
+
 <div id='body_${id}'></div>
+
 </div>
 <div class='elx-script'>
- 
+
+
+ var view=elx.host.getViewById("${id}");
  var viewId = view.id;
+  var div = $("#mega${id}");
+ console.log("early div",div);
  var cfgoptions = view.typeinfo;
  var f = view.typeinfo.data;
  var margin = [cfgoptions.marginB, cfgoptions.marginL, cfgoptions.marginT, cfgoptions.marginR],
@@ -601,7 +630,7 @@ a:hover{font-weight:700;color:#000}#body_${id}{margin:0;font-size:14px;font-fami
      height = cfgoptions.height - margin[0] - margin[2];
 	  var frameWidth = view.typeinfo.frameWidth;
 	var frameHeight = view.typeinfo.frameHeight;
-	 var div = $("#div${id}");
+	
  var formatClassKey = cfgoptions.formatClassKey,
      formatClassCast = cfgoptions.formatClassCast,
      formatPrefixCast = cfgoptions.formatPrefixCast;
@@ -644,7 +673,7 @@ a:hover{font-weight:700;color:#000}#body_${id}{margin:0;font-size:14px;font-fami
  var safeRead;var cutTableName; var getArr;
  var cTypeClassOutput;
   var  extendArr, arrToHex1;
-  var hexToModel1,processCFields,modelToHex,groupByFn,chartPreGen,initializeToolTip;
+  var hexToModel1,processCFields,modelToHex,groupByFn,chartPreGen,initializeToolTip,settingFrame,configNavBar;
 
   debugFn();
  // get Data
@@ -695,6 +724,9 @@ var rootObj={};
 var Fselect={};
 var ToolTipContainer={};
   var groupCount = 0;
+  var dataGroupHex="#dataGroup_"+viewId;
+  var maxBubbleSize=50;
+  var linkSize=170;
  chartPreGen(data2,rootObj, Fselect);
   initializeFselect(f, view, nestArr, groupCount,Fselect,ToolTipContainer);
  
@@ -706,12 +738,16 @@ var ToolTipContainer={};
 	  .margin(margin)
 	  .root(rootObj)
 	  .groupCount(groupCount)
+	  .dataGroupHex(dataGroupHex)
+  	  .linkSize(linkSize)
+  	  .maxBubbleSize(maxBubbleSize)
+	  .navBarMinWidth(cfgoptions.navBarMinWidth+'px')
 	  .ToolTipContainer(ToolTipContainer)
 	  .Fselect(Fselect);
     d3.select("#body_"+viewId).datum([]).call(chart);
 	
 	settingFrame(frameHeight,frameWidth,view,div,elx);
-  
+ 
 	
  function debugFn() {
 
@@ -1180,6 +1216,7 @@ var ToolTipContainer={};
              Fselect['sumField'] = _.values(ToolTipContainer);
 
          };
+
 		safeRead = function() {
 			var current, formatProperty, obj, prop, props, val, _i, _len;
 
@@ -1229,10 +1266,14 @@ var ToolTipContainer={};
       return colm;
   };
 	settingFrame=function(frameHeight,frameWidth,view,div,elx){
-	 d3.select("#mega${id}").style("overflow",'scroll').style("height",frameHeight+"px").style("width",frameWidth+"px");
+	 d3.select("#mega"+view.id).style("overflow",'scroll').style("height",frameHeight+"px").style("width",frameWidth+"px");
+  	console.log("div",div);
    	elx.host.setupAutoResize(div, function(w,h){
-  	if(w !== view.typeinfo.width || h != view.typeinfo.height){
-  	d3.select("#mega${id}").style("overflow",'scroll').style("height",h+"px").style("width",w+"px");
+  
+	console.log("d3selectMega",d3.select("#mega"+view.id));
+	console.log("w:",w);
+  	if(w !== view.typeinfo.frameWidth || h != view.typeinfo.frameHeight){
+  	d3.select("#mega"+view.id).style("overflow",'scroll').style("height",h+"px").style("width",w+"px");
   		}
     });
 	
