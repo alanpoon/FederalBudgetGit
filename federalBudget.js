@@ -125,11 +125,11 @@ function federalChart(){
 	return chart;
 	function debugFn2(){
 		initializeNavBar=function(dataGroupKey,dataGroupHex,viewId,ToolTipContainer){
-		console.log("initializeNavBar..");
+		
 	      root.values.forEach(toggleAll);
         toggle(root.values[2]);	        
 			if (dataGroupKey === 'navBar') {
-		console.log("dataGroupHex",dataGroupHex);
+	
 			var dataGroupContent = d3.select(dataGroupHex);
             dataGroupContent.append("td").attr('width',(navBarMinWidth+30)+'px')
                 .append("select").attr("id", 'periodSelect_' + viewId);
@@ -147,7 +147,7 @@ function federalChart(){
 		
 			  addPeriodOptions(periodSelect_el,ToolTipContainer);
 			  } else {
-			  console.log("else true");
+			  
 			       $(periodSelect_hex).empty();
 				   	  }
 					  
@@ -218,8 +218,8 @@ function federalChart(){
 		values:[450],
 		change:function(event,ui){
 		height=ui.value;
-		console.log("height used",height);
-	console.log("d3.select",d3.select("#body_"+viewId));
+		
+	
 		 tree.size([height, width]);
 		 d3.select("#body_"+viewId+" svg").attr("height", height + parseInt(margin[0]) + parseInt(margin[2]));
 
@@ -234,13 +234,13 @@ function federalChart(){
 	console.log("addPeriodOptions periodSelect_el",periodSelect_el);
 	
         _.each(_.values(ToolTipContainer), function(m) {
-		console.log("mm m",m);
+	
          //   var opt = $('&lt;option /&gt;', {
 		    var opt = $('<option />', {
                 value: m,
                 text: m
             });
-				console.log("opt hot",opt);
+				
             opt.appendTo(periodSelect_el);
         });
 
