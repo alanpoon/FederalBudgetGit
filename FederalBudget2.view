@@ -99,12 +99,8 @@
       "type":"FederalBudget2",
       "data":{
 	
-		"cToggleTypeCol":[{
-		"name":"Department"
-		}],
-		"cDescriptionCol":[{
-		"name":"Employee Description"
-		}],
+		"cToggleTypeCol":[{"name":"Department"}],
+		"cDescriptionCol":[{"name":"Employee Description"}],
 		"keys":[
             {
               "name":"Team",
@@ -120,14 +116,6 @@
               {
                 "id":"Salary.1",
                 "name":"Salary",
-                "op":"sum"
-              }, {
-                "id":"Profit.2",
-                "name":"Profit",
-                "op":"sum"
-              }, {
-                "id":"Sales Target.3",
-                "name":"Sales Target",
                 "op":"sum"
               }
             ]
@@ -430,7 +418,7 @@
                   },
                   {
                      "jsonClass":"SchemaColumnSelect",
-                     "id":"typeinfo-data-cToggleTypeCol[0]-name",
+                     "id":"typeinfo-data-cToggleTypeCol",
                      "type":"select-schema-column",
                      "value":"${typeinfo.data.cToggleTypeCol[0].name}"
                   }
@@ -476,7 +464,7 @@
                   },
                   {
                      "jsonClass":"SchemaColumnSelect",
-                     "id":"typeinfo-data-cDescriptionCol[0]-name",
+                     "id":"typeinfo-data-cDescriptionCol",
                      "type":"select-schema-column",
                      "value":"${typeinfo.data.cDescriptionCol[0].name}"
                   }
@@ -577,7 +565,8 @@ elx.bundle.type.FederalBudget2 = {
                                                         "typeinfo-data-operable-values", view, dataOps);
 		$("#typeinfo-data-operable-values-table").data("table",tableOp);
 	  elx.host.utils.initSectionGroups(view,$("#FederalBudget2-div"));
-	  $("#typeinfo-data-cToggleTypeCol").val(view.typeinfo.data.cToggleTypeCol[0].name);
+	 $("#typeinfo-data-cToggleTypeCol").val(view.typeinfo.data.cToggleTypeCol[0].name);
+        $("#typeinfo-data-cDescriptionCol").val(view.typeinfo.data.cDescriptionCol[0].name);
 	},
 
 	validate : function(view) {
@@ -595,9 +584,21 @@ elx.bundle.type.FederalBudget2 = {
         view.typeinfo.data.keys = elx.MultiKeyColumnSection.buildKeyData(dataKey);
  
 		elx.host.utils.saveProperties(view.typeinfo);
-      
-           	var dToggleType = $("#typeinfo-data-cToggleTypeCol").val();
-		view.typeinfo.data.cToggleTypeCol[0].name = dToggleType;
+      console.log("desKey",$("#typeinfo-cDescriptionKey").val());
+      if($("#typeinfo-cDescriptionKey").val()=='default'|| $("#typeinfo-data-cDescriptionCol").val()==null) {
+        console.log("cDescriptionKey should be default");
+        view.typeinfo.data.cDescriptionCol[0]={};}
+      else{
+         var dDescription = $("#typeinfo-data-cDescriptionCol").val();
+        console.log("dDescription",dDescription);
+        console.log("view cDes",view.typeinfo.data.cDescriptionCol);
+		view.typeinfo.data.cDescriptionCol[0]['name'] = dDescription;
+      }
+      if($("#typeinfo-cToggleKey").val()=='default'|| $("#typeinfo-data-cToggleTypeCol").val()==null) {view.typeinfo.data.cToggleTypeCol[0]={};}
+      else{
+       var dToggle = $("#typeinfo-data-cToggleTypeCol").val();
+		view.typeinfo.data.cToggleTypeCol[0]['name'] = dToggle;
+      }
     }
 	
 };
@@ -607,7 +608,7 @@ elx.bundle.type.FederalBudget2 = {
   #body_${id}{margin:0;font-size:14px;font-family:"Helvetica Neue",Helvetica}
   .node circle{cursor:pointer;stroke-width:1.5px}.node text{font-size:11px}
     path.link{fill:none;stroke:#ccc;stroke-width:1.5px}
- 
+ td.sliderClass{width:120px;}
   .ui-multiselect{padding:2px 0 2px 4px;text-align:left}.ui-multiselect span.ui-icon{float:right}.ui-multiselect-single .ui-multiselect-checkboxes input{position:absolute!important;top:auto!important;left:-9999px}.ui-multiselect-single .ui-multiselect-checkboxes label{padding:5px!important}.ui-multiselect-header{margin-bottom:3px;padding:3px 0 3px 4px}.ui-multiselect-header ul{font-size:.9em}.ui-multiselect-header ul li{float:left;padding:0 10px 0 0}.ui-multiselect-header a{text-decoration:none}.ui-multiselect-header a:hover{text-decoration:underline}.ui-multiselect-header span.ui-icon{float:left}.ui-multiselect-header li.ui-multiselect-close{float:right;text-align:right;padding-right:0}.ui-multiselect-menu{display:none;padding:3px;position:absolute;z-index:10000;text-align:left}.ui-multiselect-checkboxes{position:relative;overflow-y:auto}.ui-multiselect-checkboxes label{cursor:default;display:block;border:1px solid transparent;padding:3px 1px}.ui-multiselect-checkboxes label input{position:relative;top:1px}.ui-multiselect-checkboxes li{clear:both;font-size:.9em;padding-right:3px}.ui-multiselect-checkboxes li.ui-multiselect-optgroup-label{text-align:center;font-weight:700;border-bottom:1px solid}.ui-multiselect-checkboxes li.ui-multiselect-optgroup-label a{display:block;padding:3px;margin:1px 0;text-decoration:none}* html .ui-multiselect-checkboxes label{border:none}
 </style>
 <div id ='mega${id}'>
@@ -622,7 +623,8 @@ elx.bundle.type.FederalBudget2 = {
  var view=elx.host.getViewById("${id}");
  var viewId = view.id;
   var div = $("#mega${id}");
- console.log("early div",div);
+ console.log("view",JSON.stringify(view));
+
  var cfgoptions = view.typeinfo;
  var f = view.typeinfo.data;
  var margin = [cfgoptions.marginB, cfgoptions.marginL, cfgoptions.marginT, cfgoptions.marginR],
@@ -634,11 +636,12 @@ elx.bundle.type.FederalBudget2 = {
  var formatClassKey = cfgoptions.formatClassKey,
      formatClassCast = cfgoptions.formatClassCast,
      formatPrefixCast = cfgoptions.formatPrefixCast;
+	  var formatClass;
  if (formatClassKey == 'formatClassCast') {
-     var formatClass;
+    
      eval(formatClassCast);
- }
- var formatClass = {
+ } else{
+  formatClass = {
      '1': {
          'cToggleAccept': 'All', //salary
          'formatValueByCategory': function(arr) {
@@ -667,15 +670,21 @@ elx.bundle.type.FederalBudget2 = {
          }
      }
  };
- 
+ }
  var initializedCMap = {};
 
  var safeRead;var cutTableName; var getArr;
  var cTypeClassOutput;
   var  extendArr, arrToHex1;
-  var hexToModel1,processCFields,modelToHex,groupByFn,chartPreGen,initializeToolTip,settingFrame,configNavBar;
+  var hexToModel1,processCFields,modelToHex,groupByFn,chartPreGen,initializeToolTip,settingFrame,configNavBar,initializeCFieldsObj;
 
   debugFn();
+  var cFieldsObj={};
+  initializeCFieldsObj(view);
+  console.log("cFieldsObj",cFieldsObj);
+   cManipulateView(cFieldsObj);
+  
+ console.log("viewAfterManipulated",JSON.stringify(view));
  // get Data
  if (view.data.jsonClass === "DataEmbedded") {
      rawdata = [
@@ -710,11 +719,11 @@ elx.bundle.type.FederalBudget2 = {
  console.log("before debugFn");
   console.log("f",f);
 
-  var data1 = arrToHex1(extendedArr, f, view,initializedCMap);
+  var data1 = arrToHex1(extendedArr, f, view,initializedCMap,cFieldsObj);
  var legendKey = 'lastGroupby_op';
  var formatLegendCast = "";
 console.log("data Hex",data1[0]);
-
+console.log("initializedCMap",initializedCMap);
  var data2=modelAddCMap(data1,initializedCMap);
  console.log("data AddCMap[0]",data2[0]);
  var data2 = hexToModel1(data2, legendKey, formatLegendCast, view);
@@ -728,8 +737,12 @@ var ToolTipContainer={};
   var maxBubbleSize=50;
   var linkSize=170;
  chartPreGen(data2,rootObj, Fselect);
-  initializeFselect(f, view, nestArr, groupCount,Fselect,ToolTipContainer);
+  initializeFselect(f, view, nestArr, groupCount,Fselect,ToolTipContainer,cFieldsObj);
  
+ console.log("rootObj",JSON.stringify(rootObj));
+ console.log("viewId",viewId);
+ console.log("Fselect",Fselect);
+ console.log("ToolTipContainer",ToolTipContainer);
     //render Chart
     chart = federalChart()
 	  .viewId(viewId)
@@ -741,7 +754,7 @@ var ToolTipContainer={};
 	  .dataGroupHex(dataGroupHex)
   	  .linkSize(linkSize)
   	  .maxBubbleSize(maxBubbleSize)
-	  .navBarMinWidth(cfgoptions.navBarMinWidth+'px')
+	  .navBarMinWidth(parseInt(cfgoptions.navBarMinWidth))
 	  .ToolTipContainer(ToolTipContainer)
 	  .Fselect(Fselect);
     d3.select("#body_"+viewId).datum([]).call(chart);
@@ -791,39 +804,12 @@ var ToolTipContainer={};
              return extendedArr;
 
          };
-   arrToHex1 = function(data, f, view, initializedCMap) {
+   arrToHex1 = function(data, f, view, initializedCMap,cFieldsObj) {
              var keyLength = f.keys.length;
              var nameArr = getArr(f, 'name', view);
              var opArr = getArr(f, 'op', view);
              var idArr = getArr(f.operable.values, 'id', view);
-             var cFieldsObj = {
-                 'cToggle': {
-                     cKey: 'cToggleEnabled',
-                     cKeyField: view.typeinfo.cToggleKey,
-                     cDataField: view.typeinfo.data.cToggleTypeCol[0].name,
-                     cTrue: function(data, cfieldsObjName, numCFieldObj,groupCount,cFieldsObjSize,initializedCMap){
-					 var newField="";
-					 return cTypeClassOutput['majority'](data, cfieldsObjName, numCFieldObj,groupCount,cFieldsObjSize,newField, initializedCMap);
-					 },
-					 cDefault: function(data, cfieldsObjName, numCFieldObj,groupCount,cFieldsObjSize,initializedCMap){
-					 var newField="";
-					 return cTypeClassOutput['cMapNotDefined'](data, cfieldsObjName, numCFieldObj,groupCount,cFieldsObjSize,newField, initializedCMap);
-					 }
-						//cDefault is the function to execute with cKey is 'default'
-                 },
-                 'cDescription': {
-                     cKey: 'cDescriptionEnabled',
-                     cKeyField: view.typeinfo.cDescriptionKey,
-                     cDataField: view.typeinfo.data.cDescriptionCol[0].name,
-                     cTrue: function(data, cfieldsObjName, numCFieldObj,groupCount,cFieldsObjSize,initializedCMap){
-					
-					 },
-					 cDefault:function(data, cfieldsObjName, numCFieldObj,groupCount,cFieldsObjSize, initializedCMap){
-					 var newField='#{cDescription}';
-					 return  cTypeClassOutput['equalsToAnotherField'](data, cfieldsObjName, numCFieldObj,groupCount,cFieldsObjSize,newField, initializedCMap);
-					 }
-                 }
-             };
+        
 			
             var propertiesArr = processCFields(data,keyLength, nameArr, opArr, idArr, cFieldsObj, initializedCMap,view);
 			 console.log("propertiesArr kl",propertiesArr);
@@ -850,32 +836,59 @@ var ToolTipContainer={};
              var numCFieldObj = 0;
              var cFieldClass = {};
 			 var groupCount=_.size(getArr(view.typeinfo.data.keys,'name',view));
-			 var cFieldsObjSize=_.size(_.keys(cFieldsObj));
+			// var cFieldsObjSize=_.size(_.keys(cFieldsObj));
 			 initializedCMap['cFieldsObj']=[];
              for (var propertyName in cFieldsObj) {
-                 if (cFieldsObj[propertyName]['cKeyField'] == cFieldsObj[propertyName]['cKey'] && cFieldsObj[propertyName]['cDataField'] != null) 
+			 console.log('cDataField',cFieldsObj[propertyName]['cDataField']);
+                 if (cFieldsObj[propertyName]['cKeyField'] == cFieldsObj[propertyName]['cKey'] && 
+				 _.size(_.keys(cFieldsObj[propertyName]['cDataField'])) != 0) 
 					{
                      cFieldClass[numCFieldObj] = '#{' + propertyName + '}';   
                      //initializing cMap if need be.
-                     cFieldsObj[propertyName]['cTrue'](data, propertyName, numCFieldObj,groupCount,cFieldsObjSize, initializedCMap);
+                     cFieldsObj[propertyName]['cTrue'](data, propertyName, numCFieldObj,groupCount, initializedCMap);
 					 numCFieldObj++;
 					 initializedCMap['cFieldsObj'].push(cFieldsObj[propertyName]['cType']);
                  }
 				 else {
-				 cFieldsObj[propertyName]['cDefault'](data, propertyName, numCFieldObj,groupCount,cFieldsObjSize, initializedCMap);
+				 cFieldsObj[propertyName]['cDefault'](data, propertyName, numCFieldObj,groupCount, initializedCMap);
+				 
 				 }
              }
-             
-             var keyArr = _.first(nameArr, keyLength + numCFieldObj);
-             var colArr = _.last(nameArr, nameArr.length - (keyLength + numCFieldObj));
+             function getKeyArr(nameArr,startIndex,length){
+			 var rangeArr=_.range(startIndex,length+startIndex);
+			 console.log("rangeArr",rangeArr);
+				var filtered=_.filter(nameArr,function(num,i){ var o=false;
+				_.each(rangeArr,function(n,m){
+				if(i==n) o=true;
+				}); return o;});
+			return filtered;
+			 }
+			 function getColArr(nameArr,startIndex,length){
+			 var nameArrLength=_.size(nameArr);
+			 var firstIndexForCol=startIndex+length;
+			 var rangeArr=_.range(firstIndexForCol,nameArrLength+1);
+			 	var filtered=_.filter(nameArr,function(num,i){ var o=false;
+				_.each(rangeArr,function(n,m){
+				if(i==n) o=true;
+				}); return o;});
+			return filtered;
+			 }
+        console.log("numCFieldObj",numCFieldObj);
+		console.log("keyLength",keyLength);
+		console.log("nameArr",nameArr);
+		   var keyArr=getKeyArr(nameArr,numCFieldObj,keyLength);
+		   var colArr=getColArr(nameArr,numCFieldObj,keyLength);
+		   console.log("keyArr",keyArr);
+		   console.log("colArr",colArr);
              var nameArr = _.map(colArr, function(num, i) {
                  return opArr[i] + "(" + num + ")";
              });
             
              var keyLArr = d3.range(0, keyLength + numCFieldObj);
              var propertiesArr = [];
+			 var cFieldClassSize=_.size(_.keys(cFieldClass));
              keyLArr.forEach(function(d, i) {
-                 var obj = (typeof cFieldClass[i] != 'undefined') ? cFieldClass[i] : '#{groupby' + (i - 1) + '}';
+                 var obj = (typeof cFieldClass[i] != 'undefined') ? cFieldClass[i] : '#{groupby' + (i + 1-cFieldClassSize) + '}';
                  propertiesArr.push(obj);
              })
 			 var bracIdArr=_.map(idArr,function(m){
@@ -885,8 +898,61 @@ var ToolTipContainer={};
 
              return propertiesArr;
          };
+		 initializeCFieldsObj=function(view){
+			cFieldsObj = {
+                 'cToggle': {
+                     cKey: 'cToggleEnabled',
+                     cKeyField: view.typeinfo.cToggleKey,
+                     cDataField: view.typeinfo.data.cToggleTypeCol[0],
+					  cDataFieldURL:"view.typeinfo.data.cToggleTypeCol[0]",
+					
+                     cTrue: function(data, cfieldsObjName, numCFieldObj,groupCount,initializedCMap){
+					 var newField="";
+					 return cTypeClassOutput['majority'](data, cfieldsObjName, numCFieldObj,groupCount,newField, initializedCMap);
+					 },
+					 cDefault: function(data, cfieldsObjName, numCFieldObj,groupCount,initializedCMap){
+					 var newField="";
+					 return cTypeClassOutput['cMapNotDefined'](data, cfieldsObjName, numCFieldObj,groupCount,newField, initializedCMap);
+					 }
+						//cDefault is the function to execute with cKey is 'default'
+                 },
+                 'cDescription': {
+                     cKey: 'cDescriptionEnabled',
+                     cKeyField: view.typeinfo.cDescriptionKey,
+                     cDataField: view.typeinfo.data.cDescriptionCol[0],
+					 cDataFieldURL:"view.typeinfo.data.cDescriptionCol[0]", 
+					
+                     cTrue: function(data, cfieldsObjName, numCFieldObj,groupCount,initializedCMap){
+					
+					 },
+					 cDefault:function(data, cfieldsObjName, numCFieldObj,groupCount, initializedCMap){
+					 var newField='#{cDescription}';
+					 return  cTypeClassOutput['equalsToAnotherField'](data, cfieldsObjName, numCFieldObj,groupCount,newField, initializedCMap);
+					 }
+                 }
+             };
+		};
+	 cManipulateView=function(cFieldsObj){
+		 console.log("cFieldsObj...",cFieldsObj);
+		           for (var propertyName in cFieldsObj) {
+			 console.log('cDataField',cFieldsObj[propertyName]);
+                 if (cFieldsObj[propertyName]['cKeyField'] == cFieldsObj[propertyName]['cKey'] && 
+				 _.size(_.keys(cFieldsObj[propertyName]['cDataField'])) != 0) 
+					{
+                 var urlString= cFieldsObj[propertyName]['cDataFieldURL']+"={name:'"+propertyName+ "'}";
+				 eval(urlString);
+				 
+                 }
+				 else {
+				var urlString= cFieldsObj[propertyName]['cDataFieldURL']+"={}";
+				 eval(urlString);
+				 }
+				 console.log("cManipulateView[",propertyName,"]:",cFieldsObj[propertyName]['cDataField']);
+             }
+		 };
+	
 		  cTypeClassOutput = {
-                 'majority': function(data, cfieldsObjName, positionIndex,groupCount,cFieldsObjSize,newField, initializedCMap) {
+                 'majority': function(data, cfieldsObjName, positionIndex,groupCount,newField, initializedCMap) {
                      var cMaj = [];
                      _.each(data, function(d) {
                          cMaj.push(d[positionIndex]);
@@ -907,13 +973,13 @@ var ToolTipContainer={};
                      }
 
                  },
-                 'uniqToAnotherField': function(data, cfieldsObjName, positionIndex,groupCount,cFieldsObjSize,newField, initializedCMap) {
+                 'uniqToAnotherField': function(data, cfieldsObjName, positionIndex,groupCount,newField, initializedCMap) {
 					
 					//positionIndex is the positionIndex is position of the cfield in JSON-array
 					var uniqDescription=[];
 					var uniqMap={};
 					_.each(data,function(d,i) {//JSON with only two fields
-						var pegIndex= cFieldsObjSize+groupCount-1;
+						var pegIndex= positionIndex+groupCount-1;
 						
 						if(i==0) {uniqDescription.push(d[positionIndex]);			
 						var pegName=d[pegIndex];
@@ -932,14 +998,15 @@ var ToolTipContainer={};
 						initializedCMap[cfieldsObjName]['map']=uniqMap;
 						initializedCMap[cfieldsObjName]['newField']=newField;
                  },
-				 'cMapNotDefined': function(data, cfieldsObjName, positionIndex,groupCount,cFieldsObjSize,newField, initializedCMap) {
+				 'cMapNotDefined': function(data, cfieldsObjName, positionIndex,groupCount,newField, initializedCMap) {
 				 
 				 },
-				 'equalsToAnotherField':function(data, cfieldsObjName, positionIndex,groupCount,cFieldsObjSize,newField, initializedCMap) {
+				 'equalsToAnotherField':function(data, cfieldsObjName, positionIndex,groupCount,newField, initializedCMap) {
 				var uniqDescription=[];
 					var uniqMap={};
+			
 					_.each(data,function(d,i) {//JSON with only two fields
-						var pegIndex= cFieldsObjSize+groupCount-1;
+						var pegIndex= positionIndex+groupCount-1;
 						
 						if(i==0) {uniqDescription.push(d[positionIndex]);			
 						var pegName=d[pegIndex];
@@ -1184,26 +1251,25 @@ var ToolTipContainer={};
     
 
          };
-  initializeFselect = function(f, view, nestArr, groupCount,Fselect,ToolTipContainer) {
+  initializeFselect = function(f, view, nestArr, groupCount,Fselect,ToolTipContainer,cFieldsObj) {
              var modelYAxisMap = getArr(f.operable, 'id', view);
-             modelYAxisMap = _.map(modelYAxisMap, function(d) {
-                 var obj = {};
-                 var propertyName = d.split('.')[1];
-                 obj[propertyName] = d.split(".")[0];
-                 return obj;
-             });
+       
+			 var modelYAxisMapObj={};
+			 _.each(modelYAxisMap,function(m,n){
+			  var propertyName = m.split('.')[1];
+			  modelYAxisMapObj[propertyName]=m.split(".")[0];
+			 })
 			console.log('modelYAxisMap kop',modelYAxisMap);
 			
-                //if cToggleType matches with formatClass' cToggleAccept then append the model into ToolTipContainer
-             if (formatClassKey == 'formatClassCast') {
-                 for (var propertyName in formatValue) {
-                     if (formatClass[propertyName]['cToggleAccept'] == 'All' || formatClass[propertyName]['cToggleAccept'] == cToggleType) {
-                         ToolTipContainer[propertyName]=_.values(modelYAxisMap[propertyName])[0];
+                if (formatClassKey == 'formatClassCast') {
+                 for (var propertyName in formatClass) {
+                     if (formatClass[propertyName]['cToggleAccept'] == 'All' || formatClass[propertyName]['cToggleAccept'] == cFieldsObj['cToggle']['cTrue']) {
+                         ToolTipContainer[propertyName]=modelYAxisMapObj[propertyName];
                      }
                  }
              } else {
-                 for (var propertyName in modelYAxisMap) {
-                      ToolTipContainer[propertyName]=_.values(modelYAxisMap[propertyName])[0];
+                 for (var propertyName in modelYAxisMapObj) {
+                      ToolTipContainer[propertyName]=modelYAxisMapObj[propertyName];
                  }
              }
 
