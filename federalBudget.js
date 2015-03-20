@@ -127,11 +127,11 @@ function federalChart(){
 		initializeNavBar=function(dataGroupKey,dataGroupHex,viewId,ToolTipContainer){
 		
 	      root.values.forEach(toggleAll);
-        toggle(root.values[2]);	        
+        //toggle(root.values[2]);	        
 			if (dataGroupKey === 'navBar') {
 	
 			var dataGroupContent = d3.select(dataGroupHex);
-            dataGroupContent.append("td").attr('width',(navBarMinWidth+30)+'px')
+            dataGroupContent.append("td").attr('width',(parseInt(navBarMinWidth)+30)+'px')
                 .append("select").attr("id", 'periodSelect_' + viewId);
 				var periodSelect_hex = '#periodSelect_' + viewId;
 	         var periodSelect_el = $(periodSelect_hex).multiselect({
