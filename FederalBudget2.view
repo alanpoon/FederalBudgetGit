@@ -148,6 +148,9 @@
   },{
     "id":"FederalBudget2",
     "name":"FederalBudget2"
+  },{
+    "id":"filters",
+    "name":"Filters"
   }]
 }
 ========
@@ -656,7 +659,7 @@ elx.bundle.type.FederalBudget2 = {
          'formatValueByCategory': function(arr) {
              return sum(arr);
          },
-         'formatOutlook': function(val) {
+         'formatValueOutlook': function(val) {
              return ' ' + d3.round(prefixClass['2']('Size').scale(val), 2) + prefixClass['2']('Size').symbol;
          }
      },
@@ -665,7 +668,7 @@ elx.bundle.type.FederalBudget2 = {
          'formatValueByCategory': function(arr) {
              return sum(arr);
          },
-         'formatOutlook': function(val) {
+         'formatValueOutlook': function(val) {
              return ' ' + d3.round(prefixClass['3']('Size').scale(val), 2) + prefixClass['3']('Size').symbol;
          }
      }
@@ -1252,27 +1255,21 @@ var ToolTipContainer={};
 
          };
   initializeFselect = function(f, view, nestArr, groupCount,Fselect,ToolTipContainer,cFieldsObj) {
-             var modelYAxisMap = getArr(f.operable, 'id', view);
-       
-			 var modelYAxisMapObj={};
-			 _.each(modelYAxisMap,function(m,n){
-			  var propertyName = m.split('.')[1];
-			  modelYAxisMapObj[propertyName]=m.split(".")[0];
-			 })
+          
+            var modelYAxisMap = getArr(f.operable, 'id', view);
+             modelYAxisMap = _.map(modelYAxisMap, function(d) {
+                 var obj = {};
+                 var propertyName = d.split('.')[1];
+                 obj[propertyName] = d.split(".")[0];
+                 return obj;
+             });
+	
 			console.log('modelYAxisMap kop',modelYAxisMap);
-			
-                if (formatClassKey == 'formatClassCast') {
-                 for (var propertyName in formatClass) {
-                     if (formatClass[propertyName]['cToggleAccept'] == 'All' || formatClass[propertyName]['cToggleAccept'] == cFieldsObj['cToggle']['cTrue']) {
-                         ToolTipContainer[propertyName]=modelYAxisMapObj[propertyName];
-                     }
-                 }
-             } else {
-                 for (var propertyName in modelYAxisMapObj) {
-                      ToolTipContainer[propertyName]=modelYAxisMapObj[propertyName];
-                 }
-             }
-
+			_.each(modelYAxisMap,function(j,k){
+					     var propertyName=k+1;
+                         ToolTipContainer[propertyName]=_.values(j)[0];
+                         
+				});
              var fSelectNameArr = _.map(_.values(ToolTipContainer), function(d) {
                  return 'sum_' + d;
              }); // add 'sum_' infront
