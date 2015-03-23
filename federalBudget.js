@@ -328,7 +328,7 @@ function federalChart(){
         });
         _.each(groupbyRange, function(d, i) {
             holding[d + '_Radius'] = d3.scale.sqrt()
-                .domain([0,holding[d+'_Max'][Fselect.spendField]])
+                .domain([0,holding['groupby1_Max'][Fselect.spendField]])
                 .range([1, parseInt(maxBubbleSize)]);
 
         });

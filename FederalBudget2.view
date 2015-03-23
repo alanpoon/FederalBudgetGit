@@ -639,41 +639,7 @@ elx.bundle.type.FederalBudget2 = {
  var formatClassKey = cfgoptions.formatClassKey,
      formatClassCast = cfgoptions.formatClassCast,
      formatPrefixCast = cfgoptions.formatPrefixCast;
-	  var formatClass;
- if (formatClassKey == 'formatClassCast') {
-    
-     eval(formatClassCast);
- } else{
-  formatClass = {
-     '1': {
-         'cToggleAccept': 'All', //salary
-         'formatValueByCategory': function(arr) {
-             return sum(arr);
-         },
-         'formatValueOutlook': function(val) {
-             return ' ' + d3.round(prefixClass['1']('Size').scale(val), 2) + prefixClass['1']('Size').symbol;
-         }
-     },
-     '2': {
-         'cToggleAccept': 'All', //
-         'formatValueByCategory': function(arr) {
-             return sum(arr);
-         },
-         'formatValueOutlook': function(val) {
-             return ' ' + d3.round(prefixClass['2']('Size').scale(val), 2) + prefixClass['2']('Size').symbol;
-         }
-     },
-     '3': {
-         'cToggleAccept': 'Sales', //
-         'formatValueByCategory': function(arr) {
-             return sum(arr);
-         },
-         'formatValueOutlook': function(val) {
-             return ' ' + d3.round(prefixClass['3']('Size').scale(val), 2) + prefixClass['3']('Size').symbol;
-         }
-     }
- };
- }
+
  var initializedCMap = {};
 
  var safeRead;var cutTableName; var getArr;
@@ -740,7 +706,8 @@ var ToolTipContainer={};
   var maxBubbleSize=50;
   var linkSize=170;
  chartPreGen(data2,rootObj, Fselect);
-  initializeFselect(f, view, nestArr, groupCount,Fselect,ToolTipContainer,cFieldsObj);
+  var modelYAxisObj={};
+  initializeFselect(f, view, nestArr, groupCount,Fselect,ToolTipContainer,cFieldsObj,modelYAxisObj);
  
  console.log("rootObj",JSON.stringify(rootObj));
  console.log("viewId",viewId);
@@ -752,6 +719,7 @@ var ToolTipContainer={};
 	  .width(width)
 	  .height(height)
 	  .margin(margin)
+	   .modelYAxisObj(modelYAxisObj)
 	  .root(rootObj)
 	  .groupCount(groupCount)
 	  .dataGroupHex(dataGroupHex)
@@ -760,6 +728,12 @@ var ToolTipContainer={};
 	  .navBarMinWidth(parseInt(cfgoptions.navBarMinWidth))
 	  .ToolTipContainer(ToolTipContainer)
 	  .Fselect(Fselect);
+	  
+	  var formatClass;
+ if (formatClassKey == 'formatClassCast') {
+     eval(formatClassCast);
+	 chart.formatClass(formatClass);
+ }
     d3.select("#body_"+viewId).datum([]).call(chart);
 	
 	settingFrame(frameHeight,frameWidth,view,div,elx);
@@ -1204,14 +1178,10 @@ var ToolTipContainer={};
              var result = [];
              nest.rollup(function(k) {
                  var sampleObj = _.clone(k[0]);
-                 if (typeof safeRead(formatClass, _.pluck(k, 'yAxis'), 'formatValueOutlook') != 'undefined' && view.typeinfo.formatClassKey == 'formatClassCast') {
-                     sampleObj['value'] = formatClass[_.pluck(k, 'yAxis')]['formatValueByCategory'](_.pluck(k, 'value'));
-                 } else sampleObj['value'] = d3.sum(k, function(g) {
+				sampleObj['value'] = d3.sum(k, function(g) {
                      return g.value;
                  });
-                 if (typeof safeRead(formatClass, _.pluck(k, 'yAxis'), 'formatValueOutlook') != 'undefined' && view.typeinfo.formatClassKey == 'formatClassCast') {
-                     sampleObj['value'] = formatClass[_.pluck(k, 'yAxis')]['formatValueOutlook'](sampleObj['value']);
-                 } else sampleObj['value'] = d3.round(sampleObj['value'], 2);
+          
                  result.push(sampleObj);
              }).entries(data);
              return result;
@@ -1254,20 +1224,20 @@ var ToolTipContainer={};
     
 
          };
-  initializeFselect = function(f, view, nestArr, groupCount,Fselect,ToolTipContainer,cFieldsObj) {
-          
+  initializeFselect = function(f, view, nestArr, groupCount,Fselect,ToolTipContainer,cFieldsObj,modelYAxisObj) {
             var modelYAxisMap = getArr(f.operable, 'id', view);
-             modelYAxisMap = _.map(modelYAxisMap, function(d) {
-                 var obj = {};
-                 var propertyName = d.split('.')[1];
-                 obj[propertyName] = d.split(".")[0];
-                 return obj;
-             });
-	
+       
+		
+			_.each(modelYAxisMap,function(d){
+				var propertyName=d.split(".")[0];
+				modelYAxisObj[propertyName]=d.split(".")[1];
+				
+			});
 			console.log('modelYAxisMap kop',modelYAxisMap);
-			_.each(modelYAxisMap,function(j,k){
+			
+        	_.each(modelYAxisMap,function(j,k){
 					     var propertyName=k+1;
-                         ToolTipContainer[propertyName]=_.values(j)[0];
+                         ToolTipContainer[propertyName]=j.split(".")[0];
                          
 				});
              var fSelectNameArr = _.map(_.values(ToolTipContainer), function(d) {
