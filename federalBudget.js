@@ -30,6 +30,27 @@ function federalChart(){
 		var maxBubbleSize=50;
 		var linkSize=180;
 		var navBarMinWidth=150;
+			var formatClass = {
+     '1': {
+         'cToggleAccept': 'All', //salary
+         'formatValue': function(val) {
+             return d3.round(val,2);
+         }
+ 
+     },
+     '2': {
+         'cToggleAccept': 'All', //
+         'formatValue': function(val) {
+             return d3.round(val,2);
+         }
+     },
+     '3': {
+         'cToggleAccept': 'Sales', //
+         'formatValue': function(val) {
+             return d3.round(val,2);
+         }
+     }
+ };
 	function chart(selection) {
 
 		selection.each(function(data) {
@@ -42,7 +63,7 @@ function federalChart(){
 		 initializeNavBar(dataGroupKey,dataGroupHex,viewId,ToolTipContainer);
 		 initializeToolTip1(viewId,ToolTipContainer);
 		 initializeSliders(dataGroupHex,viewId);
-		//togglesetup();
+	
 		});
 		}	
 	chart.viewId = function(value) {
@@ -120,12 +141,21 @@ function federalChart(){
 		navBarMinWidth = value;
 		return chart;
 	};
-	
-	return chart;
+	chart.formatClass = function(value){
+		if (!arguments.length) return formatClass;
+		formatClass = value;
+		return chart;
+	};
+	chart.modelYAxisObj = function(value){
+		if (!arguments.length) return modelYAxisObj;
+		modelYAxisObj = value;
+		return chart;
+	};
+
 	return chart;
 	function debugFn2(){
 		initializeNavBar=function(dataGroupKey,dataGroupHex,viewId,ToolTipContainer){
-		
+		console.log("r root",root);
 	      root.values.forEach(toggleAll);
         //toggle(root.values[2]);	        
 			if (dataGroupKey === 'navBar') {
@@ -150,7 +180,7 @@ function federalChart(){
 			  
 			       $(periodSelect_hex).empty();
 				   	  }
-					  
+					  console.log("root......",root);
 			 update(root, groupCount,viewId);
 			};
 	initializeToolTip1=function(viewId,ToolTipContainer){
@@ -267,29 +297,7 @@ function federalChart(){
             .attr("transform", "translate(" + parseInt(margin[3]) + "," + parseInt(margin[2]) + ")");
     };
 	
-    togglesetup = function() {
-        root.values.forEach(toggleAll);
-        toggle(root.values[2]);
-        for (var propertyName in ToolTipContainer_But) {
-            var localButtonArr = _.keys(ToolTipContainer_But);
-            d3.select("#navigButton_" + (propertyName + 1)).on("click", function(d) {
-                d3.select("#navigButton_" + (propertyName + 1)).attr("class", "selected");
-			       var restlocalButtonArr = _.reject(localButtonArr, function(num) {
-                return num == propertyName;
-            });
-                Fselect['spendField'] = 'sum_' + ToolTipContainer[propertyName];
-                Fselect['actField'] = 'sum_' + ToolTipContainer[propertyName];
-                _.each(restlocalButtonArr, function(m) {
-                    ToolTipContainer_But[m].attr("class", null);
-                    ToolTipContainer_Div[m].attr("class", null);
-                });
-                setup();
-                update(root, groupCount,viewId);
-            });
-        }
-		update(root, groupCount,viewId);
-
-    };
+   
     initialize = function(groupCount) {
         var groupbyRange = _.map(_.range(1, groupCount + 1), function(m) {
             return 'groupby' + m;
@@ -393,25 +401,7 @@ function sumNodes(nodes, groupCount,viewId) {
     }
 
 }
-function sumNodeDepthZero(root){
-  for (var z = 0; z < root.values.length; z++) {
-        for (var i = 0; i < Fselect.sumField.length; i++) {
-                    if (isNaN(node["sum_" + Fselect.sumField[i]])) node["sum_" + Fselect.sumField[i]] = 0;
-                    node["sum_" + Fselect.sumField[i]] += Number(child["sum_" + Fselect.sumField[i]]);
 
-                    //Set scales;
-                    if ((node.parent)) {
-                        for (var n = 1; n <= groupCount; n++) {
-                            if (node.depth == n) {
-                                holding['groupby'+n + '_Max']["sum_" + Fselect.sumField[i]] = Math.max(parseInt(holding['groupby'+n + '_Max']["sum_" + Fselect.sumField[i]]), Number(node["sum_" + Fselect.sumField[i]]));
-							
-                            }
-                        }
-                        setSourceFields(node, node.parent,viewId);
-                    }
-                }
-				}
-}
 
 function update(source, groupCount,viewId) {
 
@@ -499,9 +489,9 @@ function update(source, groupCount,viewId) {
             var groupbyRange = _.map(_.range(1, groupCount + 1), function(m) {
                 return 'groupby' + m;
             });
-            if (d.depth == 1) {
+            if (d.depth) {
                 var ret = d.key;
-            }
+            } 
             _.each(groupbyRange, function(m, n) {
                 if (d.depth == (n + 2)) {
                     var ret = d['source_' + m];
@@ -690,8 +680,8 @@ function node_onMouseOver(d, groupCount,viewId) {
 	_.each(Fselect['sumField'],function(m,n){
 		var dNop='sum_'+m;
 		if(dNop==Fselect['spendField']) {
-		content=content+"<b>"+m+": "+formatCurrency(d['sum_'+m]) +"</b><br>";
-		} else content=content+m+": "+formatCurrency(d['sum_'+m])+"<br>";
+		content=content+"<b>"+m+": "+formatClass[modelYAxisObj[m]]['formatValue'](d['sum_'+m]) +"</b><br>";
+		} else content=content+m+": "+formatClass[modelYAxisObj[m]]['formatValue'](d['sum_'+m])+"<br>";
 	
 	});
 		
