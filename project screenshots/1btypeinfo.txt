@@ -1,0 +1,60 @@
+{
+   "jsonClass":"Bundle",
+   "type":"FederalBudget2",
+   "data":{
+      "cToggleTypeCol":[
+         {
+            "name":"Department"
+         }
+      ],
+      "cDescriptionCol":[
+         {
+            "name":"Employee Description"
+         }
+      ],
+      "keys":[
+         {
+            "name":"ds_1b_employee.SalesTeam",
+            "id":"|"
+         },
+         {
+            "name":"ds_1b_employee.staff_code",
+            "id":"|"
+         }
+      ],
+      "operable":{
+         "values":[
+            {
+               "id":"Sales Amount.1",
+               "name":"ds_1b_employee.Sales",
+               "op":"sum"
+            },
+            {
+               "id":"Gross Profit.1",
+               "name":"ds_1b_employee.Gross_Profit",
+               "op":"sum"
+            },
+            {
+               "id":"Acount Receivables.1",
+               "name":"ds_1b_employee.Account_Receivables",
+               "op":"sum"
+            }
+         ]
+      }
+   },
+   "formatClassKey":"formatClassCast",
+   "cToggleKey":"default",
+   "cDescriptionKey":"default",
+   "formatClassCast":"formatClass = { '1': {'cToggleAccept': 'All','formatValue': function(val) {return '$'+d3.round(val,2);}}}",
+   "formatPrefixCast":"",
+   "nestArr":"Team,Employee",
+   "width":"800",
+   "height":"750",
+   "marginB":"0",
+   "marginT":"30",
+   "marginL":"170",
+   "marginR":"50",
+   "frameWidth":"800",
+   "frameHeight":"420",
+   "navBarMinWidth":"180"
+}
