@@ -711,9 +711,7 @@ var ToolTipContainer={};
   initializeFselect(f, view, nestArr, groupCount,Fselect,ToolTipContainer,cFieldsObj,modelYAxisObj);
  
  console.log("rootObj",JSON.stringify(rootObj));
- console.log("viewId",viewId);
- console.log("Fselect",Fselect);
- console.log("ToolTipContainer",ToolTipContainer);
+
     //render Chart
     chart = federalChart()
 	  .viewId(viewId)
@@ -722,6 +720,9 @@ var ToolTipContainer={};
 	  .margin(margin)
 	   .modelYAxisObj(modelYAxisObj)
 	  .root(rootObj)
+  	.retHeader(function(d) {
+  var ret= d.key; if(d.depth==2) {ret=d.source_description;}
+  return "&lt;b&gt;" + ret +"&lt;/b&gt;&lt;hr&gt;";}) 
 	  .groupCount(groupCount)
 	  .dataGroupHex(dataGroupHex)
   	  .linkSize(linkSize)
@@ -790,8 +791,7 @@ var ToolTipContainer={};
         
 			
             var propertiesArr = processCFields(data,keyLength, nameArr, opArr, idArr, cFieldsObj, initializedCMap,view);
-			 console.log("propertiesArr kl",propertiesArr);
-			
+
 				
              var combineArr = [];
              propertiesArr.forEach(function(d, i) {
@@ -834,7 +834,7 @@ var ToolTipContainer={};
              }
              function getKeyArr(nameArr,startIndex,length){
 			 var rangeArr=_.range(startIndex,length+startIndex);
-			 console.log("rangeArr",rangeArr);
+
 				var filtered=_.filter(nameArr,function(num,i){ var o=false;
 				_.each(rangeArr,function(n,m){
 				if(i==n) o=true;
@@ -851,13 +851,10 @@ var ToolTipContainer={};
 				}); return o;});
 			return filtered;
 			 }
-        console.log("numCFieldObj",numCFieldObj);
-		console.log("keyLength",keyLength);
-		console.log("nameArr",nameArr);
+    
 		   var keyArr=getKeyArr(nameArr,numCFieldObj,keyLength);
 		   var colArr=getColArr(nameArr,numCFieldObj,keyLength);
-		   console.log("keyArr",keyArr);
-		   console.log("colArr",colArr);
+
              var nameArr = _.map(colArr, function(num, i) {
                  return opArr[i] + "(" + num + ")";
              });
@@ -917,7 +914,7 @@ var ToolTipContainer={};
                  if (cFieldsObj[propertyName]['cKeyField'] == cFieldsObj[propertyName]['cKey'] && 
 				 _.size(_.keys(cFieldsObj[propertyName]['cDataField'])) != 0) 
 					{
-                 var urlString= cFieldsObj[propertyName]['cDataFieldURL']+"={name:'"+propertyName+ "'}";
+                 var urlString= cFieldsObj[propertyName]['cDataFieldURL']+"={name:'"+cFieldsObj[propertyName]['cDataField']['name']+ "'}";
 				 eval(urlString);
 				 
                  }
@@ -1009,8 +1006,6 @@ var ToolTipContainer={};
              ReadArray = [];
 
              objKey = Object.keys(data[0]);
-			 console.log("objKey kl",objKey);
-			 console.log("data kl",data[0]);
              model_keyArray = [];
              columnNameArray = [];
              var keyArray = [];
@@ -1203,7 +1198,6 @@ var ToolTipContainer={};
 
              var aggregateData = groupByFn(modelData, groupByArr);
              var modelToHexData = modelToHex(aggregateData, groupbyRange);
-			 console.log("modelToHexData",JSON.stringify(modelToHexData));
              var nest=d3.nest();
              _.each(groupbyRange, function(m, n) {
                  nest=nest.key(function(d, i) {
@@ -1234,7 +1228,7 @@ var ToolTipContainer={};
 				modelYAxisObj[propertyName]=d.split(".")[1];
 				
 			});
-			console.log('modelYAxisMap kop',modelYAxisMap);
+
 			
         	_.each(modelYAxisMap,function(j,k){
 					     var propertyName=k+1;
@@ -1301,11 +1295,8 @@ var ToolTipContainer={};
   };
 	settingFrame=function(frameHeight,frameWidth,view,div,elx){
 	 d3.select("#mega"+view.id).style("overflow",'scroll').style("height",frameHeight+"px").style("width",frameWidth+"px");
-  	console.log("div",div);
    	elx.host.setupAutoResize(div, function(w,h){
-  
-	console.log("d3selectMega",d3.select("#mega"+view.id));
-	console.log("w:",w);
+
   	if(w !== view.typeinfo.frameWidth || h != view.typeinfo.frameHeight){
   	d3.select("#mega"+view.id).style("overflow",'scroll').style("height",h+"px").style("width",w+"px");
   		}
