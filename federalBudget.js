@@ -8,12 +8,19 @@ function federalChart(){
 		var groupCount=2;
 		var ToolTipContainer;
 		var holding={};
-		var  retDes=function(d) {
-                 var ret = d.source_description;
-                 ret = (String(ret).length > 25) ? String(ret).substr(0, 22) + "..." : ret;
-                 return ret;
+		var  retHeader=function(d) {
+
+				return "<b>" + d.key +"</b><hr>";
              };
-	
+		var  retBody=function(d,content,Fselect) {
+		_.each(Fselect['sumField'],function(m,n){
+			var dNop='sum_'+m;
+			if(dNop==Fselect['spendField']) {
+			content=content+"<b>"+m+": "+formatClass[modelYAxisObj[m]]['formatValue'](d['sum_'+m]) +"</b><br>";
+			} else content=content+m+": "+formatClass[modelYAxisObj[m]]['formatValue'](d['sum_'+m])+"<br>";
+		
+		}); return content;
+             };
 		var ToolTipContainer_Div={};
 		var ToolTipContainer_But={};
 
@@ -101,9 +108,14 @@ function federalChart(){
 		ToolTipContainer = value;
 		return chart;
 	};
-		chart.retDes = function(value){
-		if (!arguments.length) return retDes;
-		retDes = value;
+		chart.retHeader = function(value){
+		if (!arguments.length) return retHeader;
+		retHeader = value;
+		return chart;
+	};
+			chart.retBody = function(value){
+		if (!arguments.length) return retBody;
+		retBody = value;
 		return chart;
 	};
 	chart.Fselect = function(value){
@@ -668,22 +680,11 @@ function node_onMouseOver(d, groupCount,viewId) {
     var formatCurrency = function(d) {
         return formatNumber(d)
     };
- /*
-     _.each(groupbyRange, function(m, n) {
-        if (d.depth == (n + 1)) {
 
-			var headerText=d['source_' + m];
-        } else var headerText="";
-    }); */
-	var content = "<b>" + d.key + "</b><hr>";
-	
-	_.each(Fselect['sumField'],function(m,n){
-		var dNop='sum_'+m;
-		if(dNop==Fselect['spendField']) {
-		content=content+"<b>"+m+": "+formatClass[modelYAxisObj[m]]['formatValue'](d['sum_'+m]) +"</b><br>";
-		} else content=content+m+": "+formatClass[modelYAxisObj[m]]['formatValue'](d['sum_'+m])+"<br>";
-	
-	});
+	//var content = "<b>" + d.key + "</b><hr>";
+	var content =retHeader(d);
+	var content=retBody(d,content,Fselect);
+
 		
 		d3.select(".tooltip_"+viewId).style("visibility", "visible")
 			.style("top", (d3.event.pageY-35)+"px")
