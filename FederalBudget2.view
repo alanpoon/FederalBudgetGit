@@ -626,7 +626,7 @@ elx.bundle.type.FederalBudget2 = {
  var view=elx.host.getViewById("${id}");
  var viewId = view.id;
   var div = $("#mega${id}");
- console.log("view",JSON.stringify(view));
+ console.log("view.type, federal Budget",JSON.stringify(view.typeinfo));
 
  var cfgoptions = view.typeinfo;
  var f = view.typeinfo.data;
@@ -679,6 +679,7 @@ elx.bundle.type.FederalBudget2 = {
      var reduceCToggleArr = extendedArr;
  } else {
      rawdata = ${data};
+	
      var extendedArr = extendArr(rawdata, f, view);
  }
  console.log("rawdata", JSON.stringify(rawdata));
@@ -1193,7 +1194,7 @@ var ToolTipContainer={};
                  if (_.str.include(property, 'groupby')) groupCount++;
              }
 			 
-			 groupCount=2;
+			
              groupbyRange = _.map(_.range(1, groupCount + 1), function(m) {
                  return 'groupby' + m;
              });
