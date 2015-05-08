@@ -135,9 +135,10 @@
 		"marginR":"20",
       "frameWidth":"670",
       "frameHeight":"420",
-      "navBarMinWidth":"180"
-      }
-		 },
+      "navBarMinWidth":"180",
+      "retHeaderCast":"var retHeader=function(d) {return '<b>' + d.key +'</b><hr>';};"
+    }
+    },
   "includes":["/elx/lib/d3.v3.js","/elx/lib/federalBudget.js","/elx/lib/multiSelectCustom.js"],
   "edit-section":[{
     "id":"view",
@@ -306,6 +307,29 @@
                      "id":"typeinfo-navBarMinWidth",
                      "type":"field",
                      "value":"${typeinfo.navBarMinWidth}",
+                     "readonly":false
+                  }
+               ]
+            }
+         ]
+      },{
+         "jsonClass":"Group",
+         "label":"Format Tooltip",
+         "rows":[
+            {
+               "jsonClass":"Row",
+               "cols":[
+                  {
+                     "jsonClass":"Label",
+                     "id":"typeinfo-retHeaderCast-label",
+                     "type":"label",
+                     "text":"Header"
+                  },
+                  {
+                     "jsonClass":"Field",
+                     "id":"typeinfo-retHeaderCast",
+                     "type":"field",
+                     "value":"${typeinfo.retHeaderCast}",
                      "readonly":false
                   }
                ]
@@ -639,7 +663,8 @@ elx.bundle.type.FederalBudget2 = {
  var formatClassKey = cfgoptions.formatClassKey,
      formatClassCast = cfgoptions.formatClassCast,
      formatPrefixCast = cfgoptions.formatPrefixCast;
-
+	var retHeader;
+  eval(cfgoptions.retHeaderCast);
  var initializedCMap = {};
 
  var safeRead;var cutTableName; var getArr;
@@ -720,9 +745,7 @@ var ToolTipContainer={};
 	  .margin(margin)
 	   .modelYAxisObj(modelYAxisObj)
 	  .root(rootObj)
-  	.retHeader(function(d) {
-  var ret= d.key; if(d.depth==2) {ret=d.source_description;}
-  return "&lt;b&gt;" + ret +"&lt;/b&gt;&lt;hr&gt;";}) 
+  	.retHeader(retHeader) 
 	  .groupCount(groupCount)
 	  .dataGroupHex(dataGroupHex)
   	  .linkSize(linkSize)
@@ -1202,7 +1225,7 @@ var ToolTipContainer={};
              _.each(groupbyRange, function(m, n) {
                  nest=nest.key(function(d, i) {
                      return d[m];
-                 });
+                 }).sortKeys(d3.ascending);
              });
 			
              rootObj['values'] = nest.entries(modelToHexData);
